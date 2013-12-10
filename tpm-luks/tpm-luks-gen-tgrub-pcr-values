@@ -113,10 +113,12 @@ trap cleanup EXIT
 OLD_IFS=${IFS}
 IFS=$'\n'
 TITLES=( $(cat $MENU | awk -F "\n" '$1 ~ /^[\W]*title/ { print $0 }' | sed 's/title//') )
-ROOTS=( $(cat $MENU | awk -F "\n" '$1 ~ /^\Wroot/ { print $0 }') )
-KERNELS=( $(cat ${MENU} | awk -F "\n" '$1 ~ /^\Wkernel/ { print $0 }') )
-INITRDS=( $(cat $MENU | awk -F "\n" '$1 ~ /^\Winitrd/ { print $0 }') )
-DEFAULT=$(cat $MENU | awk -F= '$1 ~ /default/ { print $2 }')
+ROOTS=( $(cat $MENU | awk -F "\n" '$1 ~ /^[\W]*root/ { print $0 }') )
+KERNELS=( $(cat ${MENU} | awk -F "\n" '$1 ~ /^[\W]*kernel/ { print $0 }') )
+INITRDS=( $(cat $MENU | awk -F "\n" '$1 ~ /^[\W]*initrd/ { print $0 }') )
+
+
+DEFAULT=$(cat $MENU | awk  '$1 ~ /^default/ { print $2 }')
 IFS=${OLD_IFS}
 
 NUM_ENTRIES=$(( ${#KERNELS[@]} - 1 ))
@@ -129,11 +131,18 @@ for e in $(seq 0 $NUM_ENTRIES); do
 	INITRD_FILES[$e]="/boot$(echo ${INITRDS[$e]} | awk '{ print $2 }')"
 
 	# compute hashes of the strings themselves (required for PCR 12)
-	ROOTS[$e]=$(echo "${ROOTS[$e]}" | sed 's/^[ \t]*//' | tr -d "\n"|sha1sum | awk '{ print $1}')
-	KERNELS[$e]=$(echo "${KERNELS[$e]}" | sed 's/^[ \t]*//' | tr -d "\n"|sha1sum | awk '{ print $1}')
-	INITRDS[$e]=$(echo "${INITRDS[$e]}" | sed 's/^[ \t]*//' | tr -d "\n"|sha1sum | awk '{ print $1}')
+	# replaces tabs with space, needed for trusted grub
+	ROOTS[$e]=$(echo "${ROOTS[$e]}" | sed 's/^[ \t]*//' | tr "\t" " "  | tr -d "\n" | sha1sum | awk '{ print $1}')
+	KERNELS[$e]=$(echo "${KERNELS[$e]}" | sed 's/^[ \t]*//' | tr "\t" " "  | tr -d "\n" | sha1sum | awk '{ print $1}')
+	INITRDS[$e]=$(echo "${INITRDS[$e]}"| sed 's/^[ \t]*//'  | tr "\t" " " | tr -d "\n" | sha1sum | awk '{ print $1}')
+
+
+
+
 done
 BOOT=$(echo -n "boot" | sha1sum | awk '{ print $1 }')
+
+
 
 #echo "Writing PCRs for \"$MENU\" boot entries:"
 for e in $(seq 0 $NUM_ENTRIES); do
@@ -181,7 +190,7 @@ for e in $(seq 0 $NUM_ENTRIES); do
 			echo "r $PCRNUM $CURR_PCR" >> ${OUTFILE}
 			;;
 		12)
-			CURR_PCR=$(tpm-luks-chain-hashes -o $TMPFILE -h ${ROOTS[$e]} ${KERNELS[$e]} ${INITRDS[$e]} ${BOOT})
+			CURR_PCR=$(tpm-luks-chain-hashes -o $TMPFILE -h ${KERNELS[$e]} ${INITRDS[$e]} ${BOOT})
 			echo "r $PCRNUM $CURR_PCR" >> ${OUTFILE}
 			#echo "w $PCRNUM $CURR_PCR"
 			;;
