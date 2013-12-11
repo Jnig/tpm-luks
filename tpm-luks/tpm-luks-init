@@ -7,6 +7,29 @@
 #
 CONF=/etc/tpm-luks.conf
 NVPERMSFILE=$(mktemp /tmp/${0##*/}-XXXXXX)
+OWNERPASS=""
+
+function usage
+{
+        echo "usage ${0##*/}: [-y]"
+        echo -e "  -y                use the well known secret (all zeroes) as the owner password."
+        echo -e "                     This will apply both to the NV define and NV write operations"
+        echo -e "                     if they apply, as well as NV read."
+        echo -e "  -h                help"
+
+}
+
+while getopts "r" opt; do
+        case $opt in
+        y)
+                OWNERPASS="-y"
+                ;;
+        *)
+                usage
+                exit 255
+                ;;
+        esac
+done
 
 function cleanup
 {
@@ -37,7 +60,7 @@ for d in $(seq 0 $NUM_DEVICES); do
 	fi
 
 	echo "Creating new TPM NVRAM secret for ${DEVICES[$d]}..."
-	tpm-luks -c -d ${DEVICES[$d]} -i ${INDEXES[$d]} -p ${NVPERMSFILE}
+	tpm-luks -c -d ${DEVICES[$d]} -i ${INDEXES[$d]} -p ${NVPERMSFILE} ${OWNERPASS}
 	if [ $? -ne 0 ]; then
 		echo "tpm-luks has failed. Aborting."
 		exit 3
