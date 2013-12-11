@@ -19,7 +19,7 @@ function usage
 
 }
 
-while getopts "r" opt; do
+while getopts "y" opt; do
         case $opt in
         y)
                 OWNERPASS="-y"

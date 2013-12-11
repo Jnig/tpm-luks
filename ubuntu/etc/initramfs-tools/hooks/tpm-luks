@@ -1,0 +1,51 @@
+#!/bin/sh
+
+
+. /usr/share/initramfs-tools/hook-functions
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+mkdir -p ${DESTDIR}/var/lib/tpm
+if [ -f /var/lib/tpm/system.data ]; then
+   cp /var/lib/tpm/system.data ${DESTDIR}/var/lib/tpm/
+fi
+
+cp /etc/tcsd.conf ${DESTDIR}/etc/
+cp /etc/group ${DESTDIR}/etc/
+cp /etc/passwd ${DESTDIR}/etc/
+cp /etc/resolv.conf ${DESTDIR}/etc/
+cp /etc/hosts ${DESTDIR}/etc/
+
+
+cp /lib/x86_64-linux-gnu/libnss_compat.so.2 ${DESTDIR}/lib/
+cp /lib/x86_64-linux-gnu/libnsl.so.1 ${DESTDIR}/lib/
+cp /lib/x86_64-linux-gnu/libnss_nis.so.2 ${DESTDIR}/lib/
+cp /lib/x86_64-linux-gnu/libnss_files.so.2 ${DESTDIR}/lib/
+
+cp /lib/x86_64-linux-gnu/libnss_dns.so.2 ${DESTDIR}/lib/
+
+
+mkdir -p ${DESTDIR}/etc/udev/
+cp /etc/localtime ${DESTDIR}/etc/
+
+copy_exec /usr/sbin/tcsd
+copy_exec /usr/sbin/tpm_version
+copy_exec /usr/bin/tpm_unsealdata
+
+copy_exec /sbin/ip
+copy_exec /usr/bin/killall
+copy_exec /bin/netstat
+copy_exec /usr/bin/strace
+copy_exec /bin/nc
+copy_exec /bin/bash
+copy_exec /usr/bin/less
+copy_exec /bin/chown
+copy_exec /usr/bin/diff
+copy_exec /bin/cat
+copy_exec /bin/hostname
+copy_exec /usr/bin/ldd
+copy_exec /usr/bin/screen
+copy_exec /usr/sbin/tpm_nvread
+
+
+exit 0

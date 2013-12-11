@@ -20,7 +20,7 @@ function usage
 
 }
 
-while getopts "r" opt; do
+while getopts "ry" opt; do
         case $opt in
         r)
 		REPLACE=1
