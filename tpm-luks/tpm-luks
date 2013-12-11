@@ -6,16 +6,16 @@
 #
 #set -x
 
-AWK=/bin/awk
-CRYPTSETUP=/sbin/cryptsetup
+AWK="$(which awk)"
+CRYPTSETUP="$(which cryptsetup)"
 TPM_LUKS_NV_INDEX_LIMIT=128
 
 DEVICE=
 TMPFS_MNT=/dev/shm
 TMPFS_KEYFILE=
 SCRIPT_RC=0
-OWNERPASS=
-NVPASS=
+OWNERPASS="-y"
+NVPASS="-z"
 KEY_SLOT=
 RAND_SOURCE="/dev/urandom"
 RW_PERMS="AUTHREAD|AUTHWRITE"
@@ -191,9 +191,9 @@ function nv_define_and_write
 {
 	PERMSFILE=${1}
 	DATAFILE=${TMPFS_KEYFILE}
-	NVPASS_OPTION=
+	NVPASS_OPTION="-z"
 	OWNERPASS_OPTION="-y"
-	WRITEPASS_OPTION=
+	WRITEPASS_OPTION="-z"
 
 	get_owner_password
 
@@ -201,7 +201,7 @@ function nv_define_and_write
 		NVINDEX=$(find_free_nv_index)
 	fi
 
-	if [ ! -z "${NVPASS}" ]; then
+	if [ "${NVPASS}" != "-z" ]; then
 		NVPASS_OPTION="-a ${NVPASS}"
 	fi
 
@@ -230,7 +230,9 @@ function nv_define_and_write
 			WRITEPASS_OPTION="--password=${OWNERPASS}"
 		fi
 	elif [ ${WRITE_PASS} -eq 0 ]; then
-		WRITEPASS_OPTION="--password=${NVPASS}"
+		if [ "${NVPASS}" != "-z" ]; then
+			WRITEPASS_OPTION="--password=${NVPASS}"
+		fi
 	fi
 
 	tpm_nvwrite -i ${NVINDEX} -s ${KEYFILE_SIZE} -f ${DATAFILE} ${WRITEPASS_OPTION}
