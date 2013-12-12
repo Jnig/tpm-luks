@@ -277,9 +277,17 @@ setup_mapping()
 			fi
 
 			if [ $count -le 1 ]; then
-                                
-				cryptkeyscript="cat"
-                                cryptkey="/key1.unsealed"
+				if [ -s /key1.unsealed ];then
+				      message "TPM key successfull unlocked"
+
+				      cryptkeyscript="cat"
+		                      cryptkey="/key1.unsealed"
+
+				else
+				      message "TPM key unlock not successful. Please enter your recovery password."	
+				fi
+
+
 			fi
 
 		#fi
@@ -356,14 +364,12 @@ setup_tpm()
 
 	mkdir /boot
 	mount /dev/sda1 /boot
+	
 
-	/usr/sbin/tpm_nvread -i 7 -z -f /key1.unsealed
-	#/usr/bin/tpm_unsealdata -z -i "/boot/key1.sealed-$(uname -r)" > /key1.unsealed
+	INDEX=$(grep -v '#' /etc/tpm-luks.conf | awk -F':' '{print $2 }')
+	/usr/sbin/tpm_nvread -i "$INDEX" -z -f /key1.unsealed
 
-	if [ -s /key1.unsealed ];then
-	      message "TPM key successfull unlocked"
-	      sleep 1
-	fi
+
 
 	umount /boot
 
