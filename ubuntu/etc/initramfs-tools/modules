@@ -10,5 +10,7 @@
 # raid1
 # sd_mod
 
+tpm_atmel
 tpm_infineon
+tpm_nsc
 tpm_tis

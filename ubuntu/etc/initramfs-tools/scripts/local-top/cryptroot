@@ -340,8 +340,11 @@ setup_mapping()
 
 setup_tpm()
 {
-	modprobe tpm_infineon
-	modprobe tpm_tis
+
+	MODULES="tpm_atmel tpm_infineon tpm_nsc tpm_tis"
+	for i in $MODULES;
+		do modprobe $i
+	done
 
 	/sbin/ip a add dev lo 127.0.0.1/8
 	/sbin/ip l set lo up
