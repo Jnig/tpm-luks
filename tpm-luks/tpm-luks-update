@@ -78,9 +78,17 @@ for d in $(seq 0 $NUM_DEVICES); do
 		echo "Success. Updated ${CONF} for index ${INDEXES[$d]}."
 	else 
 		echo "Replace TPM NVRAM secret for ${DEVICES[$d]}..."
-
-		LUKS_SECRET_FILE=$(tpm-luks -r -i ${INDEXES[$d]})
 		
+		# save the luks secret to /dev/shm/luks.secret
+		# otherwise the tpm-luks-update script will fail if more than one kernel update is installed at the same time
+		if [ -s "/dev/shm/luks.secret" ]; then
+			LUKS_SECRET_FILE="/dev/shm/luks.secret"
+		else
+			LUKS_SECRET_FILE=$(tpm-luks -r -i ${INDEXES[$d]})
+			cp -a $LUKS_SECRET_FILE "/dev/shm/luks.secret"
+		fi
+
+
 		if [ -s "$LUKS_SECRET_FILE" ]; then
 			tpm_nvrelease -i ${INDEXES[$d]} -y
 			MSG=$(tpm-luks -w $LUKS_SECRET_FILE -i ${INDEXES[$d]} -p ${NVPERMSFILE} ${OWNERPASS})
