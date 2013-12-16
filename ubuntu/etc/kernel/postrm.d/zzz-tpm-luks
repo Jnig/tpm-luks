@@ -12,7 +12,7 @@ case $0:$mode in
     # Also run if we have no DEB_MAINT_PARAMS, in order to work with old
     # kernel packages.
     */postinst.d/*:|*/postinst.d/*:configure|*/postrm.d/*:|*/postrm.d/*:remove)
-	exec tpm-luks-update -y -r
+		tpm-luks-update -y -r || exit 0 # updating packages should not fail
 	;;
 esac
 
