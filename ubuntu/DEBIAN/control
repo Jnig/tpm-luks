@@ -1,0 +1,10 @@
+Package: tpm-luks
+Version: 1:0.1
+Architecture: all
+Maintainer: Jakob Niggel <tpm-luks@shod.de>
+Original-Maintainer: Kent Yoder <shpedoikal@gmail.com>
+Depends: trousers (>= 0.3.11.2-1), tpm-tools (>= 1.3.8-1)
+Section: admin
+Priority: optional
+Homepage: https://github.com/shpedoikal/tpm-luks
+Description: LUKS support for storing keys in TPM NVRAM

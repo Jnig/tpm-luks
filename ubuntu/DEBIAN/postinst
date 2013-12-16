@@ -1,0 +1,17 @@
+#!/bin/sh
+
+tpm='#tpm-luks
+tpm_atmel
+tpm_infineon
+tpm_nsc
+tpm_tis
+#tpm-luks'
+
+
+# remove tpm-luks section from /etc/modules
+sed -i '/#tpm-luks/,/#tpm-luks/d' /etc/modules
+
+echo "$tpm" >> /etc/modules
+
+
+exit 0
